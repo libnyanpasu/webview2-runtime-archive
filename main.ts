@@ -173,6 +173,10 @@ const getDownloadUrl = async (arch: WEBVIEW2_ARCH): Promise<string> => {
     throw new Error("Download link not found");
   }
 
+  // Dismiss the EULA popup so it doesn't block the next arch selection
+  await page.keyboard.press("Escape");
+  await sleep(500);
+
   return href;
 };
 
