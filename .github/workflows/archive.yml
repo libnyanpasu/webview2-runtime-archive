@@ -1,0 +1,50 @@
+name: Archive WebView2 Runtime
+
+on:
+  schedule:
+    # Run every day at 02:00 UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    # Allow manual runs from the GitHub UI
+
+permissions:
+  contents: write # Required to create releases and upload assets
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            ~/.local/share/deno
+          key: deno-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-
+
+      # astral downloads Chromium to ~/.astral on first run; cache it so
+      # subsequent runs skip the download and start immediately.
+      - name: Cache astral Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.astral
+          key: astral-chromium-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: astral-chromium-${{ runner.os }}-
+
+      - name: Run archiver
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          CI: "true"
+        run: deno run --allow-all main.ts
