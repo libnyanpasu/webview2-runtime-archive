@@ -1,10 +1,13 @@
 {
   "tasks": {
-    "dev": "deno run -A --watch main.ts"
+    "dev": "deno run -A --watch main.ts",
+    "check": "deno fmt --check && deno lint && deno check main.ts downloads_test.ts archive_test.ts",
+    "test": "deno test",
+    "discover": "deno run --allow-net main.ts --dry-run"
   },
   "imports": {
-    "@astral/astral": "jsr:@astral/astral@^0.5.5",
     "@std/assert": "jsr:@std/assert@1",
-    "@octokit/rest": "npm:@octokit/rest@^21"
+    "@octokit/rest": "npm:@octokit/rest@^21",
+    "@std/async/retry": "jsr:@std/async@1/retry"
   }
 }

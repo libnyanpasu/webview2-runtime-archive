@@ -4,8 +4,12 @@ on:
   schedule:
     # Run every day at 02:00 UTC
     - cron: "0 2 * * *"
+  # Allow manual runs from the GitHub UI
   workflow_dispatch:
-    # Allow manual runs from the GitHub UI
+
+concurrency:
+  group: archive-webview2
+  cancel-in-progress: false
 
 permissions:
   contents: write # Required to create releases and upload assets
@@ -33,14 +37,8 @@ jobs:
           key: deno-${{ hashFiles('deno.lock') }}
           restore-keys: deno-
 
-      # astral downloads Chromium to ~/.astral on first run; cache it so
-      # subsequent runs skip the download and start immediately.
-      - name: Cache astral Chromium
-        uses: actions/cache@v4
-        with:
-          path: ~/.astral
-          key: astral-chromium-${{ runner.os }}-${{ hashFiles('deno.lock') }}
-          restore-keys: astral-chromium-${{ runner.os }}-
+      - name: Validate archiver
+        run: deno task check && deno task test
 
       - name: Run archiver
         env:
